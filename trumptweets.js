@@ -40,6 +40,9 @@ $(document).on("ready", function(){
     
     var quotesUsed = [];
     var tweetsUsed = [];
+    var gifsUsed = [];
+    var lastWrongGifId = 99;
+    var lastGifId = '';
 
     var searchTerm = ["Hillary", "Mexico", "Obama", "Money", "Immigrants"];
 
@@ -447,6 +450,15 @@ $(document).on("ready", function(){
         return key;
     };
 
+    function chooseDifferentGif(index, arr) {
+        if(index == 3) {
+            index--;
+        } else {
+            index++;
+        }
+        return arr[index];
+    }
+
     function requestGif() {
         var key = findKeyword();
         key = keyMapping(key);
@@ -455,7 +467,10 @@ $(document).on("ready", function(){
         .done(function(response) {
             var ranIndex = ranNumber(0,response.data.length);
             var result = response.data[ranIndex];
-                
+            if(result.id == lastGifId) {
+                result = chooseDifferentGif(ranIndex, response.data);
+            }
+            lastGifId = result.id;    
             var gifDiv = $("<div class=\"gif-div\">");
             $(gifDiv).css("height", result.images.fixed_height.height);
             $(gifDiv).css("width", result.images.fixed_height.width);
@@ -467,9 +482,14 @@ $(document).on("ready", function(){
 
     function showWrongGif() {
         var ranIndex = ranNumber(1,10);
-        var gif = "giphy_"+ranIndex+".gif";
-        var gifDiv = $("<img src='gif/"+gif+"'>");
-        $("#gif-container").prepend(gifDiv);
+        if(ranIndex == lastWrongGifId) {
+            showWrongGif();
+        } else {
+            lastWrongGifId = ranIndex;
+            var gif = "giphy_"+ranIndex+".gif";
+            var gifDiv = $("<img src='gif/"+gif+"'>");
+            $("#gif-container").prepend(gifDiv);
+        }
     };
 
     function filterTweet(quote) {

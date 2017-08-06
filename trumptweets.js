@@ -37,6 +37,9 @@ $(document).on("ready", function(){
     var time;
     var finishedLoading = false;
     var wrongGifsDir = "assets/images";
+    
+    var quotesUsed = [];
+    var tweetsUsed = [];
 
     var searchTerm = ["Hillary", "Mexico", "Obama", "Money", "Immigrants"];
 
@@ -350,9 +353,14 @@ $(document).on("ready", function(){
         })
         //after data comes back from the request
         .done(function(response){
-            type = "fake";
-            $("#quoteHere").html(response.message);
-            countdown.start();
+            if(checkIfRepetitive(getWords(response.message), quotesUsed)) {
+                fakeQuotes();
+            } else {
+                quotesUsed.push(getWords(response.message));
+                type = "fake";
+                $("#quoteHere").html(response.message);
+                countdown.start();
+            }
         });   
     };
 
@@ -369,11 +377,32 @@ $(document).on("ready", function(){
         })
         //after data comes back from the request
         .done(function(response){
-            type = "quote";
-            $("#quoteHere").html(response.message);
-            countdown.start();
+            if(checkIfRepetitive(getWords(response.message), quotesUsed)) {
+                quotes();
+            } else {
+                quotesUsed.push(getWords(response.message))
+                type = "quote";
+                $("#quoteHere").html(response.message);
+                countdown.start();
+            }
         });
     };
+
+    function checkIfRepetitive(item, arr) {
+        var repeat = false;
+        var i = 0;
+        while(!repeat && i < arr.length) {
+            if(item === arr[i]) {
+                repeat = true;
+            }
+            i++;
+        }
+        return repeat;
+    };
+
+    function getWords(str) {
+        return str.split(/\s+/).slice(0,5).join(" ");
+    }
 
 
     var createRequest = function(keyword) {
@@ -464,9 +493,14 @@ $(document).on("ready", function(){
         $("#quoteHere").empty();
         type = "tweet";
         var ranIndex = ranNumber(0,tweets.length);
-        var rand = tweets[ranIndex];
-        $("#quoteHere").html(filterTweet(rand));
-        countdown.start();  
+        if(checkIfRepetitive(ranIndex, tweetsUsed)) {
+            tweet();
+        } else {
+            tweetsUsed.push(ranIndex);
+            var rand = tweets[ranIndex];
+            $("#quoteHere").html(filterTweet(rand));
+            countdown.start();
+        }  
     };
 
 
